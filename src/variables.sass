@@ -1,0 +1,45 @@
+$borderColor: #313131
+$buttonColor: #1E90FF
+$buttonHover:  #1b79d6
+$buttonActive: #1761ac
+$anchorColor: 	#708090
+$textColor: #323941
+@mixin bigBoxShadow
+    box-shadow: 5px 5px 5px black
+@mixin smallBoxShadow
+    box-shadow: 2px 2px 2px black
+@mixin smallBorderRadius
+    border-radius: 8px
+@mixin BigBorderRadius
+    border-radius: 12px
+@mixin button 
+    @include BigBorderRadius
+    width: 150px
+    height: 40px
+    padding: 10px
+    font-size: 20px
+    background-color: $buttonColor
+    cursor: pointer
+    color: white
+    &:hover
+        background-color: $buttonHover
+    &:active
+        background-color: $buttonActive
+
+@mixin textInput
+    width: 100%
+    height: 50px
+    padding: 10px
+    outline: 1px solid $borderColor     
+    @include smallBorderRadius
+    font-size: 20px
+    color: $textColor
+    &:focus
+        @include smallBoxShadow
+        
+@mixin anchor
+    text-decoration: underline
+    color: $textColor
+    flex: 20
+    &:hover
+        text-decoration: none
