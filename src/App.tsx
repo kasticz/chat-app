@@ -16,8 +16,7 @@ function App(): JSX.Element {
         <h1>React chat app</h1>
       { isLogged === isLoggedType.FALSE && <LoginForm/>}
       {isLogged === isLoggedType.INITIAL && <Spinner/>}
-      </div>
-      
+      </div>      
     </div>
   );
 }
