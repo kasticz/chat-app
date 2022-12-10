@@ -17,9 +17,9 @@ export default function TextInput({ label, input,validation,setForm }: IInput) {
       
       setForm((prevState)=>{
         const newForm = {...prevState}
-        // console.log(newForm)
+
         newForm[ input.id as keyof typeof newForm] = verdict
-        // console.log(newForm)
+
         return newForm;
       })
     }
@@ -35,6 +35,7 @@ export default function TextInput({ label, input,validation,setForm }: IInput) {
       </label>
       {inputError ? <p className={styles.error}>{inputError}</p> : ''}
       <input
+      required
       onBlur={changeStatus}
       ref={inputRef}
         className={styles.input}

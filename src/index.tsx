@@ -1,6 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import RegisterForm from "./components/Forms/RegisterForm"
+import Main from './components/Chat/Main'
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(
@@ -8,7 +11,14 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+    <Routes>
+      <Route path='/' element={<App/>}/>
+      <Route path='/register' element={<RegisterForm/>}/>
+      <Route path='/main' element={<Main/>}/>
+    </Routes>
+    </BrowserRouter>
+    
   </React.StrictMode>
 );
 

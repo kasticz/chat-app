@@ -1,8 +1,9 @@
 import {getAuth} from 'firebase/auth'
 import { initializeApp } from "firebase/app";
+export const APIKEY = "AIzaSyBy6_w2UKt0T0JmxSZtJzuGCIA63MLkEMM"
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBy6_w2UKt0T0JmxSZtJzuGCIA63MLkEMM",
+  apiKey:APIKEY ,
   authDomain: "chat-b4f6c.firebaseapp.com",
   projectId: "chat-b4f6c",
   storageBucket: "chat-b4f6c.appspot.com",
@@ -11,6 +12,7 @@ const firebaseConfig = {
 };
 
 
-const app = initializeApp(firebaseConfig);
+export const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth()
+

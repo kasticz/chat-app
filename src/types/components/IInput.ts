@@ -5,7 +5,20 @@ export interface IInput{
     input:{
         id: string,
         type:string
+        name:string
     },
-    validation: (input:string)=> ILoginFormField
+    validation: (input: string)=> ILoginFormField
     setForm: React.Dispatch<React.SetStateAction<ILoginForm>>
+}
+
+export interface IAttachedInput{
+    label : string,
+    input:{
+        id: string,
+        type:string,
+        name:string
+    },
+    validation: (e: React.FormEvent<HTMLInputElement>)=> ILoginFormField
+    setForm: React.Dispatch<React.SetStateAction<ILoginForm>>
+
 }
