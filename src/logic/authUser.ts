@@ -1,5 +1,6 @@
+import { signInWithCredential, signInWithEmailAndPassword } from "firebase/auth"
 import { retrieveUserData } from "firebaseDB/db"
-import { APIKEY } from "firebaseDB/setup"
+import { APIKEY, auth } from "firebaseDB/setup"
 
 
 export async  function silentAuthWithRefreshToken(rt:string | null): Promise<{name:string,surname:string}>{
@@ -18,5 +19,6 @@ export async  function silentAuthWithRefreshToken(rt:string | null): Promise<{na
       const idToken = authData.id_token
 
       const userData = await retrieveUserData(uid,idToken)
-      return userData
+      await signInWithEmailAndPassword(auth,userData.login,userData.password)
+      return {name:userData.name,surname:userData.surname}
 }

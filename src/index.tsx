@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import RegisterForm from "./components/Forms/RegisterForm"
 import Main from './components/Chat/Main'
 import reportWebVitals from './reportWebVitals';
+import ChatWindow from 'components/Chat/ChatWindow';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,6 +17,7 @@ root.render(
       <Route path='/' element={<App/>}/>
       <Route path='/register' element={<RegisterForm/>}/>
       <Route path='/main' element={<Main/>}/>
+      <Route path='/chatting' element={<ChatWindow/>}/>
     </Routes>
     </BrowserRouter>
     

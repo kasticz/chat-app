@@ -7,12 +7,14 @@ import { AttachedValidation, loginValidation, nameAndSurnameValidation, password
 import AttachedInput from "components/UI/AttachedInput"
 import styles from "./LoginForms.module.sass";
 import { uploadUserAvatarToStorage } from "firebaseDB/storage";
+import { useNavigate } from "react-router";
 
 
 export default function LoginForm() {
   const [authError, setAuthError] = useState<null | string>(null);
   const [registerFormStatus, setregisterFormStatus] = useState<ILoginForm>(initialRegisterForm);
   const formRef = useRef<null | HTMLFormElement>(null)
+  const navigate = useNavigate()
 
   const formNotValid =
     Object.keys(registerFormStatus).filter(
@@ -36,7 +38,7 @@ export default function LoginForm() {
                 await uploadUserAvatarToStorage(form.get('attached'),userData.user.uid)
                 localStorage.setItem('refreshToken',userData.user.refreshToken)
             }     
-
+            navigate('/main')
         }
       
     } catch (err) {
@@ -47,7 +49,7 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="formWrapper">
+    <main className="formWrapper">
         <h1>React chat app</h1>
       <form ref={formRef} onSubmit={submitHandler} className={styles.loginForm}>
         {authError && <p className={styles.authError}>{authError}</p>}
@@ -82,8 +84,8 @@ export default function LoginForm() {
         <button  className={formNotValid ? `${styles.loginButton} ${styles.disabledButton}` : styles.loginButton}>Войти</button>
       </form>
       <p className={styles.registerMsg}>
-        Уже есть аккаунт? <a href="/">Войти</a>
+        Уже есть аккаунт? <a href="/">Зарегистрироваться</a>
       </p>
-      </div>
+      </main>
   );
 }

@@ -5,9 +5,11 @@ import Spinner from "./components/UI/Spinner";
 import RegisterForm from "components/Forms/RegisterForm";
 import { silentAuthWithRefreshToken } from "logic/authUser";
 import "./index.sass";
+import {useNavigate } from "react-router";
 
 function App(): JSX.Element {
   const [isLogged, setIsLogged] = useState<isLoggedType>(isLoggedType.INITIAL);
+  const navigate = useNavigate()
 
   useEffect(() => {
     async function getUserAuth() {
@@ -20,6 +22,8 @@ function App(): JSX.Element {
         const data = await silentAuthWithRefreshToken(refreshToken);
         if (data) {
           setIsLogged(isLoggedType.TRUE);
+          navigate('/main')
+
         }
       } catch (err) {
         localStorage.removeItem("refreshToken");
@@ -30,7 +34,7 @@ function App(): JSX.Element {
   });
 
   return (
-    <div className="App">
+    <main className="App">
       {isLogged === isLoggedType.INITIAL && <Spinner />}
 
       {isLogged === isLoggedType.FALSE && (
@@ -39,7 +43,7 @@ function App(): JSX.Element {
           <LoginForm/>
         </div>
       )}
-    </div>
+    </main>
   );
 }
 

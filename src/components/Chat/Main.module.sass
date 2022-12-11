@@ -1,0 +1,45 @@
+@import '../../variables.sass'
+.chatWrapper
+    position: absolute
+    left: 50%
+    top: 50%
+    transform: translate(-50%,-50%)
+    width: 500px
+    height: 700px
+    border: 1px solid $borderColor
+    @include smallBoxShadow
+    @include smallBorderRadius
+    padding: 15px 
+    background-color: white    
+    main
+        overflow: hidden
+        height: 100%
+    .chatHeader
+        border-bottom: 1px solid $borderColor
+        display: flex
+        align-items: center
+        height: 80px
+        img
+            border-radius: 50%
+            width: 50px
+            max-height: 100%
+            margin-right: 30px
+        .userName
+            width: 270px
+        button
+            height: 30px
+            @include button
+            width: 100px
+        p
+            margin-bottom: 10px
+            font-weight: 700
+            font-size: 20px
+        span
+            color: #389644
+            
+    .usersList
+        list-style: none
+        padding: 0
+        overflow-y: scroll
+
+    
