@@ -1,13 +1,11 @@
-import avatarPlaceholder from "@assets/placeholder.webp";
 import { auth } from "../../firebaseDB/setup";
 import { useEffect, useState } from "react";
-import styles from "./Main.module.sass";
-import { retrieveUserData, retrieveUsers } from "firebaseDB/db";
+import { fetchAllDataForMainComponent} from "firebaseDB/db";
 import { useNavigate } from "react-router";
-import { retrieveAvatar } from "firebaseDB/storage";
 import Spinner from "components/UI/Spinner";
-import { UserData } from "types/userData";
 import UserPreview from "./UserPreview";
+import avatarPlaceholder from '@assets/placeholder.webp'
+import styles from "./Main.module.sass";
 
 export default function Main() {
   const [userName, setUserName] = useState<string>();
@@ -22,17 +20,12 @@ export default function Main() {
   useEffect(() => {
     async function getUserData() {
       try {
-        const uid = auth.currentUser?.uid;
-        const idToken = await auth.currentUser?.getIdToken();
-        const userData = await retrieveUserData(uid, idToken);
-        const avatar = await retrieveAvatar(uid);
-        const users = await retrieveUsers(uid);
-        const usersPreviewList = users.map((item) => {
-          return <UserPreview key={item.uid} item={item} />;
+        const data = await fetchAllDataForMainComponent()
+        const usersPreviewList = data.users.map((item) => {
+          return <UserPreview key={item.uid} item={item}/>;
         });
-        setUserName(`${userData.name} ${userData.surname}`);
-        setAvatar(avatar);
-        retrieveUsers(uid);
+        setUserName(data.currUserFullName);
+        setAvatar(data.avatar);
         setUsersList(usersPreviewList);
       } catch (err) {
         // logout();

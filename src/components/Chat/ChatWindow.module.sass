@@ -1,0 +1,105 @@
+@import '../../variables'
+.chatWindowWrapper
+    position: absolute
+    top: 50%
+    left: 50%
+    transform: translate(-50%,-50%)
+    width: 500px
+    height: auto
+    min-height: 700px
+    @include bigBoxShadow
+    @include smallBorderRadius
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: center
+    border: 1px solid #aca5a5
+    
+.messageInputWrapper,.userToChatPanel
+    background-color: #fff
+    width: 100%
+    height: 15%
+    @include smallBorderRadius
+    
+
+.chatWindow
+    height: 500px
+    display: flex
+    flex-direction: column
+    align-items: center
+    width: 100%
+    padding: 5px
+    li
+        margin-top: 10px
+        width: 100%
+        display: flex
+        align-items: center
+        p
+            display: inline-block
+            @include BigBorderRadius
+            padding: 10px
+            font-size: 20px
+            max-width: 50%
+        
+
+.userToChatPanel
+    display: flex
+    padding: 5px 10px
+    height: 100px
+    a
+        background-color: #fff
+        display: flex
+        align-items: center
+        justify-content: center
+    p
+        font-size: 20px
+        font-weight: 700
+        margin-top: 15px
+    img
+        height: 80px
+    .logoutArrow
+        height: 50px
+
+.userToChatAvatar
+    height: 90%
+    border-radius: 50%
+    margin-right: 10px
+.logoutArrow
+    height: 40px
+    padding: 5px
+    margin-right: 30px
+    cursor: pointer
+    @include smallBorderRadius
+    
+    &:hover
+        background-color: #7c7878   
+.messageInputWrapper
+    display: flex
+    align-items: center
+    height: auto
+    padding: 10px 0
+    textarea
+        display: block
+        width: 80%
+        height: auto
+        max-height: none
+        padding: 10px
+        margin-left: 30px
+        outline: 1px solid $borderColor
+        @include smallBorderRadius
+        font-size: 20px
+        &:focus
+            box-shadow: 1px 1px 1px black
+            
+    button
+        height: 50px
+        padding: 10px
+        display: flex
+        align-items: center
+        @include BigBorderRadius
+        margin-left: 5px
+        cursor: pointer
+        &:hover,&:active
+            background-color: #928989
+        img
+            height: 40px

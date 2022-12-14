@@ -9,6 +9,8 @@ import { auth } from "./setup";
 import { UserData } from "types/userData";
 import { IPublicUser } from "types/IPublicUser";
 import { IChatMessage } from "types/IChatMessage";
+import { retrieveAvatar } from "./storage";
+import { IDataForMainComponent } from "types/components/IDataForMainComponent";
 
 export async function createUser(
   login: string,
@@ -80,6 +82,9 @@ export async function retrieveUserData(
   const resp = await fetch(
     `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/users/${uid}.json?auth=${idToken}`
   );
+  if(resp.status !== 200){
+    throw new Error('Что то пошло не так. Попробуйте позже.')
+  }
   const data = await resp.json();
   return data;
 }
@@ -95,16 +100,51 @@ export async function retrieveUsers(
   const usersArr = [...Object.values(users)].filter(item => item.uid !== userUid);
   return usersArr;
 }
+export async function retrieveUserName(
+  userUid: string | undefined
+): Promise<string> {
+  const user: {name:string,surname:string,uid:string} = await (
+    await fetch(
+     `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/usersPublic/${userUid}.json`
+    )
+  ).json();
+  const userName = `${user.name} ${user.surname}`
+  return userName
+}
+
+
 
 export async function retrieveChatHistory(
-  currUserUid: string | undefined,
-  secondUserUid: string | null
-): Promise<IChatMessage[]> {
+  secondUserUid: string | null,
+  onlyLastMsg: boolean
+): Promise<IChatMessage[] | null> {
+  const currUserUid = String(auth.currentUser?.uid)
   const uidsSorted = [currUserUid, secondUserUid].sort();
-  const chatHistory: { [key: number]: IChatMessage } = await (
+  const chatHistoryData: { [key: number]: IChatMessage } | null = await (
     await fetch(
       `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/conversations/${uidsSorted[0]}|${uidsSorted[1]}.json`
     )
   ).json();
-  return Object.values(chatHistory);
+  if(!chatHistoryData) return null
+  const  chatHistory = Object.values(chatHistoryData)
+  return onlyLastMsg ? [chatHistory[chatHistory.length - 1]] : chatHistory;
+}
+
+
+export async function fetchAllDataForMainComponent():Promise<IDataForMainComponent>{
+  const uid = auth.currentUser?.uid;
+  const idToken = await auth.currentUser?.getIdToken();
+  const userData = await retrieveUserData(uid, idToken);
+  const avatar = await retrieveAvatar(uid);
+  let users = await retrieveUsers(uid);
+
+  users = users.map(item =>{
+    item.currentUserName = `${userData.name} ${userData.surname}`
+    return item
+  })
+
+  const res: IDataForMainComponent = {currUserFullName: `${userData.name} ${userData.surname}`,avatar,users}
+
+  return res;
+
 }

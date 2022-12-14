@@ -1,5 +1,6 @@
 export interface IChatMessage{
-    from: string,
-    to: string,
-    content: string
+    from: string | null,
+    to: string | null,
+    content: string,
+    date: Date
 }
