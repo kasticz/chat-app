@@ -42,13 +42,16 @@ export default function UserPreview({ item }: { item: IPublicUser }) {
 
     }
     fetchNewLastMsg()
-    setInterval(()=>{
-      fetchNewLastMsg()
-    },2000)
+    if(!item.botId){
+    // setInterval(()=>{
+    //   fetchNewLastMsg()
+    // },2000)
+    }
+
     
   },[])
 
-  const userName = `${item.name} ${item.surname}`
+  const userName = `${item.name}${item.botId ? '' : ' '}${item.surname}`
 
  
 
@@ -56,7 +59,7 @@ export default function UserPreview({ item }: { item: IPublicUser }) {
   return lastMsgContentState.msg ? (
     <li>
     <Link
-      to={`/chatting?user1=${auth.currentUser?.uid}&user2=${item.uid}`}
+      to={`/chatting?user1=${auth.currentUser?.uid}&user2=${item.uid}&botId=${item.botId ? item.botId : ''}`}
       className={styles.userWrapper}
     >
       

@@ -7,7 +7,7 @@ export function removeSpacesFromString(s:string):string{
 export function getDateAsString(date:string | Date):string{
     dayjs.extend(customParseFormat)
     const dateConverted = dayjs(date)
-    const dateAsString = dayjs(dateConverted,'DD-MM-YYYY HH:mm').format('DD-MM-YYYY HH:mm')
+    const dateAsString = dayjs(dateConverted,'DD-MM-YYYY HH:mm:ss').format('DD-MM-YYYY HH:mm:ss')
     return dateAsString
 
 }

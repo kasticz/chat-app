@@ -1,6 +1,6 @@
 import { auth } from "../../firebaseDB/setup";
 import { useEffect, useState } from "react";
-import { fetchAllDataForMainComponent} from "firebaseDB/db";
+import { fetchAllDataForMainComponent, getBotReply} from "firebaseDB/db";
 import { useNavigate } from "react-router";
 import Spinner from "components/UI/Spinner";
 import UserPreview from "./UserPreview";
@@ -21,7 +21,6 @@ export default function Main() {
     async function getUserData() {
       try {
         const data = await fetchAllDataForMainComponent()
-        console.log(data.users)
         const usersPreviewList = data.users.map((item) => {
           return <UserPreview key={item.uid} item={item}/>;
         });

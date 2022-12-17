@@ -11,6 +11,7 @@ import { IPublicUser } from "types/IPublicUser";
 import { IChatMessage } from "types/IChatMessage";
 import { retrieveAvatar } from "./storage";
 import { IDataForMainComponent } from "types/components/IDataForMainComponent";
+import { IBotReply } from "types/IBotReply";
 
 export async function createUser(
   login: string,
@@ -78,7 +79,7 @@ export async function uploadUserDataToDb(
 export async function retrieveUserData(
   uid: string | undefined,
   idToken: string | undefined
-): Promise<{ name: string; surname: string; login: string; password: string }> {
+): Promise<{ name: string; surname: string; login: string; password: string,botId?:boolean }> {
   const resp = await fetch(
     `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/users/${uid}.json?auth=${idToken}`
   );
@@ -105,12 +106,12 @@ export async function retrieveUsers(
 export async function retrieveUserName(
   userUid: string | undefined
 ): Promise<string> {
-  const user: { name: string; surname: string; uid: string } = await (
+  const user: { name: string; surname: string; uid: string,botId?:boolean } = await (
     await fetch(
       `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/usersPublic/${userUid}.json`
     )
   ).json();
-  const userName = `${user.name} ${user.surname}`;
+  const userName = `${user.name}${user.botId ? '': ' '}${user.surname}`;
   return userName;
 }
 
@@ -138,12 +139,12 @@ export async function fetchAllDataForMainComponent(): Promise<IDataForMainCompon
   let users = await retrieveUsers(uid);
 
   users = users.map((item) => {
-    item.currentUserName = `${userData.name} ${userData.surname}`;
+    item.currentUserName = `${userData.name}${userData.botId ? '' : ' '}${userData.surname}`;
     return item;
   });
 
   const res: IDataForMainComponent = {
-    currUserFullName: `${userData.name} ${userData.surname}`,
+    currUserFullName: `${userData.name}${userData.botId ? '' :' '}${userData.surname}`,
     avatar,
     users,
   };
@@ -165,4 +166,51 @@ export async function uploadMsgToDb(msg: IChatMessage) {
       }
     }
   );
+  if(uploadResp.status !== 200) throw new Error()
+}
+
+
+
+
+export async function getBotReply(botId:string,conversationId:string | null,msg:IChatMessage):Promise<IBotReply>{
+  const resp = await fetch('https://www.botlibre.com/rest/json/chat',{
+    method:'POST',
+    body: JSON.stringify({
+      application: '2881031034935656442' ,
+      instance: botId,
+      message: msg.content,
+      conversation: conversationId ? conversationId : ''
+    }),
+    headers:{
+      'Content-type': 'application/json'
+    }
+  })
+  if(resp.status !== 200){
+    throw new Error()
+  }
+  const res: {conversation:string,message:string} = await resp.json()
+  const typedRes: IBotReply = {
+    conversation:res.conversation,
+    from: msg.to,
+    to:msg.from,
+    content: res.message,
+    date: new Date()
+  }
+
+  const sortedUids = [msg.from, msg.to].sort();
+  const uploadResp = await fetch(
+    `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/conversations/${sortedUids[0]}|${sortedUids[1]}.json`,{
+      method: "POST",
+      body: JSON.stringify({
+        msg:typedRes,
+      }),
+      headers:{
+        'Content-type':'application/json'
+      }
+    }
+  );
+  if(uploadResp.status !== 200){
+    throw new Error()
+  }
+  return typedRes
 }

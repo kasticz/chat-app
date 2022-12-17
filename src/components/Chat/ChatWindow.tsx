@@ -2,6 +2,7 @@ import { Navigate, useSearchParams } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { auth } from "firebaseDB/setup";
 import {
+  getBotReply,
   retrieveChatHistory,
   retrieveUserName,
   uploadMsgToDb,
@@ -19,20 +20,31 @@ import ChatMessage from "./ChatMessage";
 export default function ChatWindow() {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const [chatHistoryState, setChatHistoryState] = useState<IChatMessage[] | null>(null);
+  const [chatHistoryState, setChatHistoryState] = useState<
+    IChatMessage[] | null
+  >(null);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const chatWindowRef = useRef<HTMLUListElement>(null)
-  const dummyDivToScrollRef = useRef<HTMLDivElement>(null)
+  const chatWindowRef = useRef<HTMLUListElement>(null);
+  const dummyDivToScrollRef = useRef<HTMLDivElement>(null);
+  const [botConversationId, setBonConversationId] = useState<string | null>(
+    null
+  );
 
   const [queryParams] = useSearchParams();
   const location = useLocation();
 
+  const botId = queryParams.get('botId')
+  const user2 = String(queryParams.get('user2'))
+
   useEffect(() => {
     async function getChatHistory() {
-      const chatHistory = await retrieveChatHistory(queryParams.get("user2"), false);
-      if(chatHistory?.length === chatHistoryState?.length) return
+      const chatHistory = await retrieveChatHistory(
+        user2,
+        false
+      );
+      if (chatHistory?.length === chatHistoryState?.length) return;
       if (!chatHistory) {
         setChatHistoryState(null);
         return;
@@ -40,11 +52,11 @@ export default function ChatWindow() {
       setChatHistoryState(chatHistory);
     }
     async function getAvatar() {
-      const avatar = await retrieveAvatar(String(queryParams.get("user2")));
+      const avatar = await retrieveAvatar(user2);
       setAvatar(avatar ? avatar : noAvatar);
     }
     async function getUserName() {
-      setUserName(await retrieveUserName(String(queryParams.get("user2"))));
+      setUserName(await retrieveUserName(user2));
     }
     if (!auth.currentUser) {
       navigate(
@@ -54,23 +66,25 @@ export default function ChatWindow() {
       try {
         getUserName();
         getChatHistory();
-        setInterval(()=>{
-            getChatHistory();
-        },2000)
+        if(!botId){
+        // setInterval(()=>{
+      //     getChatHistory();
+        // },2000)
+        }
+
         getAvatar();
       } catch (err) {
         navigate("/");
       }
     }
-  }, [navigate, queryParams, location.search]);
+  }, [navigate, botId,user2, location.search]);
 
   const chatHistoryList = useMemo(() => {
-    const secondUid = queryParams.get("user2");
     return chatHistoryState
       ? chatHistoryState.map((item) => {
           return (
             <ChatMessage
-              uid={secondUid}
+              uid={user2}
               item={item}
               key={item.date.toLocaleString()}
             />
@@ -78,12 +92,12 @@ export default function ChatWindow() {
         })
       : [
           <ChatMessage
-            uid={secondUid}
+            uid={user2}
             item={{ from: null, to: null, date: new Date(), content: "" }}
             key={Math.random()}
           />,
         ];
-  }, [chatHistoryState, queryParams]);
+  }, [chatHistoryState,user2]);
 
   async function sendMsg(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -91,8 +105,8 @@ export default function ChatWindow() {
     if (!msgText) return;
     try {
       const msg: IChatMessage = {
-        from: String(queryParams.get("user1")),
-        to: String(queryParams.get("user2")),
+        from: String(auth.currentUser?.uid),
+        to: user2,
         content: String(msgText),
         date: new Date(),
       };
@@ -102,15 +116,22 @@ export default function ChatWindow() {
         return [...prevState, msg];
       });
       setTimeout(() => {
-        dummyDivToScrollRef.current?.scrollIntoView({behavior:'smooth'})         
+        dummyDivToScrollRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 200);
-           
+      if (botId) {
+        const reply = await getBotReply(String(botId),botConversationId,msg);
+        if (!botConversationId) setBonConversationId(reply.conversation);
+        setChatHistoryState((prevState)=>{
+          if (!prevState) return [reply];
+          return [...prevState, reply];
+        })
+      }
+      inputRef.current.value = '';
     } catch (err) {
       setError("Что то пошло не так. Попробуйте позже");
     }
   }
-  dummyDivToScrollRef.current?.scrollIntoView({behavior:'smooth'})
-  
+  dummyDivToScrollRef.current?.scrollIntoView({ behavior: "smooth" });
 
   return avatar && chatHistoryList && userName ? (
     <main className={styles.chatWindowWrapper}>
@@ -125,7 +146,9 @@ export default function ChatWindow() {
         />
         <p>{userName}</p>
       </header>
-      <ul ref={chatWindowRef} className={styles.chatWindow}>{error ? error : chatHistoryList} <div ref={dummyDivToScrollRef}></div></ul>
+      <ul ref={chatWindowRef} className={styles.chatWindow}>
+        {error ? error : chatHistoryList} <div ref={dummyDivToScrollRef}></div>
+      </ul>
       <form onSubmit={sendMsg} className={styles.messageInputWrapper}>
         <textarea placeholder="Наберите сообщение" ref={inputRef} />
         <button>

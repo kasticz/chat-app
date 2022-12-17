@@ -5,5 +5,6 @@ export interface IPublicUser{
     surname:string,
     uid:string,
     currentUserName: string | undefined
-    lastMsg: IChatMessage
+    lastMsg: IChatMessage,
+    botId?:boolean
 }

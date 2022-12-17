@@ -1,5 +1,6 @@
 export interface UserData{
     name:string,
     surname:string,
-    uid:string
+    uid:string,
+    botId?:boolean
 }
