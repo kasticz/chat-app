@@ -82,8 +82,8 @@ export async function retrieveUserData(
   const resp = await fetch(
     `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/users/${uid}.json?auth=${idToken}`
   );
-  if(resp.status !== 200){
-    throw new Error('Что то пошло не так. Попробуйте позже.')
+  if (resp.status !== 200) {
+    throw new Error("Что то пошло не так. Попробуйте позже.");
   }
   const data = await resp.json();
   return data;
@@ -97,54 +97,72 @@ export async function retrieveUsers(
       "https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/usersPublic.json"
     )
   ).json();
-  const usersArr = [...Object.values(users)].filter(item => item.uid !== userUid);
+  const usersArr = [...Object.values(users)].filter(
+    (item) => item.uid !== userUid
+  );
   return usersArr;
 }
 export async function retrieveUserName(
   userUid: string | undefined
 ): Promise<string> {
-  const user: {name:string,surname:string,uid:string} = await (
+  const user: { name: string; surname: string; uid: string } = await (
     await fetch(
-     `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/usersPublic/${userUid}.json`
+      `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/usersPublic/${userUid}.json`
     )
   ).json();
-  const userName = `${user.name} ${user.surname}`
-  return userName
+  const userName = `${user.name} ${user.surname}`;
+  return userName;
 }
-
-
 
 export async function retrieveChatHistory(
   secondUserUid: string | null,
   onlyLastMsg: boolean
 ): Promise<IChatMessage[] | null> {
-  const currUserUid = String(auth.currentUser?.uid)
+  const currUserUid = String(auth.currentUser?.uid);
   const uidsSorted = [currUserUid, secondUserUid].sort();
-  const chatHistoryData: { [key: number]: IChatMessage } | null = await (
+  const chatHistoryData: { [key: string]: {msg:IChatMessage} } | null = await (
     await fetch(
       `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/conversations/${uidsSorted[0]}|${uidsSorted[1]}.json`
     )
   ).json();
-  if(!chatHistoryData) return null
-  const  chatHistory = Object.values(chatHistoryData)
-  return onlyLastMsg ? [chatHistory[chatHistory.length - 1]] : chatHistory;
+  if (!chatHistoryData) return null;
+  const chatHistory = Object.values(chatHistoryData);
+  return onlyLastMsg ? [chatHistory[chatHistory.length - 1].msg] : chatHistory.map(item => item.msg);
 }
 
-
-export async function fetchAllDataForMainComponent():Promise<IDataForMainComponent>{
+export async function fetchAllDataForMainComponent(): Promise<IDataForMainComponent> {
   const uid = auth.currentUser?.uid;
   const idToken = await auth.currentUser?.getIdToken();
   const userData = await retrieveUserData(uid, idToken);
   const avatar = await retrieveAvatar(uid);
   let users = await retrieveUsers(uid);
 
-  users = users.map(item =>{
-    item.currentUserName = `${userData.name} ${userData.surname}`
-    return item
-  })
+  users = users.map((item) => {
+    item.currentUserName = `${userData.name} ${userData.surname}`;
+    return item;
+  });
 
-  const res: IDataForMainComponent = {currUserFullName: `${userData.name} ${userData.surname}`,avatar,users}
+  const res: IDataForMainComponent = {
+    currUserFullName: `${userData.name} ${userData.surname}`,
+    avatar,
+    users,
+  };
 
   return res;
+}
 
+export async function uploadMsgToDb(msg: IChatMessage) {
+  const sortedUids = [msg.from, msg.to].sort();
+
+  const uploadResp = await fetch(
+    `https://chat-b4f6c-default-rtdb.europe-west1.firebasedatabase.app/conversations/${sortedUids[0]}|${sortedUids[1]}.json`,{
+      method: "POST",
+      body: JSON.stringify({
+        msg,
+      }),
+      headers:{
+        'Content-type':'application/json'
+      }
+    }
+  );
 }

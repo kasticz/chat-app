@@ -29,17 +29,28 @@
     align-items: center
     width: 100%
     padding: 5px
+    overflow-y: scroll
+    padding-bottom: 10px
     li
-        margin-top: 10px
+        margin-top: 20px
         width: 100%
         display: flex
         align-items: center
-        p
+        position: relative
+        .msg
             display: inline-block
             @include BigBorderRadius
             padding: 10px
             font-size: 20px
             max-width: 50%
+            position: relative
+        .msgDate
+            width: 110px
+            position: absolute
+            bottom: -20px
+            font-size: 14px
+            color: #918989
+            font-style: italic
         
 
 .userToChatPanel
@@ -90,6 +101,7 @@
         font-size: 20px
         &:focus
             box-shadow: 1px 1px 1px black
+            outline: 2px solid black
             
     button
         height: 50px

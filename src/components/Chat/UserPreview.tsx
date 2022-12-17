@@ -2,51 +2,49 @@ import { IPublicUser } from "types/IPublicUser";
 import { useEffect, useState } from "react";
 import { retrieveAvatar } from "firebaseDB/storage";
 import noAvatar from "@assets/placeholder.webp";
-import styles from "./UserPreview.module.sass";
 import { Link } from "react-router-dom";
 import { auth } from "firebaseDB/setup";
 import { useNavigate } from "react-router-dom";
 import { retrieveChatHistory } from "firebaseDB/db";
 import { IChatMessage } from "types/IChatMessage";
+import { getDateAsString } from "logic/utility";
 import Spinner from "components/UI/Spinner";
+import styles from "./UserPreview.module.sass";
 
 
 export default function UserPreview({ item }: { item: IPublicUser }) {
   const navigate = useNavigate()
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
-  const [lastMsgContentState,setlastMsgContentState] = useState<string>('')
+  const [lastMsgContentState,setlastMsgContentState] = useState<{msg:string,date: string | Date}>({msg:'',date:new Date()})
 
   useEffect(() => {
     async function getAvatar() {
       const avatar = await retrieveAvatar(item.uid);
       setUserAvatar(avatar);
     }
-    if (!auth.currentUser) {
-      navigate("/");
-    } else {
-      getAvatar();
-    }
+    getAvatar();
   },[item.uid]);
 
   useEffect(()=>{
     async function fetchNewLastMsg(){
       const fetchedLastMsg = await retrieveChatHistory(item.uid,true)
       if(!fetchedLastMsg){
-        setlastMsgContentState('Вы ещё не беседовали с данным пользователем')
+        setlastMsgContentState({msg:'Вы ещё не беседовали с данным пользователем',date: new Date()})
         return
       }
       let lastMsg: IChatMessage = fetchedLastMsg[0]
-      if(lastMsg.content === lastMsgContentState) return
+      if(lastMsg.content === lastMsgContentState.msg) return
       const lastMsgFromThisUser =  lastMsg.from === item.uid
       const finalLastMsg = lastMsgFromThisUser ? `${userName}: ${lastMsg.content}` : `${item.currentUserName}: ${lastMsg.content}`
+      const lastMsgDate = lastMsg.date
 
-      setlastMsgContentState(finalLastMsg)
+      setlastMsgContentState({msg:finalLastMsg,date:lastMsgDate})
 
     }
     fetchNewLastMsg()
-    // setInterval(()=>{
-    //   fetchNewLastMsg()
-    // },5000)
+    setInterval(()=>{
+      fetchNewLastMsg()
+    },2000)
     
   },[])
 
@@ -55,7 +53,7 @@ export default function UserPreview({ item }: { item: IPublicUser }) {
  
 
 
-  return lastMsgContentState ? (
+  return lastMsgContentState.msg ? (
     <li>
     <Link
       to={`/chatting?user1=${auth.currentUser?.uid}&user2=${item.uid}`}
@@ -65,7 +63,8 @@ export default function UserPreview({ item }: { item: IPublicUser }) {
         <img src={userAvatar ? userAvatar : noAvatar} alt="userAvatar" />
         <div className={styles.userMsg}>
         <span>{userName}</span>
-        <p>{lastMsgContentState} </p>
+        <p>{lastMsgContentState.msg}</p>
+        <p className={styles.msgDate}>{getDateAsString(lastMsgContentState.date)}</p>
         </div>
         
       

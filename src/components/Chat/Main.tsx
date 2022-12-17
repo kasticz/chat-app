@@ -21,14 +21,15 @@ export default function Main() {
     async function getUserData() {
       try {
         const data = await fetchAllDataForMainComponent()
+        console.log(data.users)
         const usersPreviewList = data.users.map((item) => {
           return <UserPreview key={item.uid} item={item}/>;
         });
+        setUsersList(usersPreviewList);
         setUserName(data.currUserFullName);
         setAvatar(data.avatar);
-        setUsersList(usersPreviewList);
       } catch (err) {
-        // logout();
+        logout();
       }
     }
     if (!auth.currentUser) {
