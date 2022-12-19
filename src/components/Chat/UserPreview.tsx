@@ -1,10 +1,9 @@
 import { IPublicUser } from "types/IPublicUser";
 import { useEffect, useState } from "react";
 import { retrieveAvatar } from "firebaseDB/storage";
-import noAvatar from "@assets/placeholder.webp";
+import noAvatar from "@assets/placeholder.png";
 import { Link } from "react-router-dom";
 import { auth } from "firebaseDB/setup";
-import { useNavigate } from "react-router-dom";
 import { retrieveChatHistory } from "firebaseDB/db";
 import { IChatMessage } from "types/IChatMessage";
 import { getDateAsString } from "logic/utility";
@@ -13,7 +12,6 @@ import styles from "./UserPreview.module.sass";
 
 
 export default function UserPreview({ item }: { item: IPublicUser }) {
-  const navigate = useNavigate()
   const [userAvatar, setUserAvatar] = useState<string | null>(null);
   const [lastMsgContentState,setlastMsgContentState] = useState<{msg:string,date: string | Date}>({msg:'',date:new Date()})
 
@@ -43,12 +41,10 @@ export default function UserPreview({ item }: { item: IPublicUser }) {
     }
     fetchNewLastMsg()
     if(!item.botId){
-    // setInterval(()=>{
-    //   fetchNewLastMsg()
-    // },2000)
-    }
-
-    
+    setInterval(()=>{
+      fetchNewLastMsg()
+    },2000)
+    }    
   },[])
 
   const userName = `${item.name}${item.botId ? '' : ' '}${item.surname}`

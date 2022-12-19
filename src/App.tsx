@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import LoginForm from "./components/Forms/LoginForm";
 import { isLoggedType } from "./types/HookTypes";
 import Spinner from "./components/UI/Spinner";
-import RegisterForm from "components/Forms/RegisterForm";
 import { silentAuthWithRefreshToken } from "logic/authUser";
 import "./index.sass";
 import { useNavigate } from "react-router";
@@ -12,7 +11,6 @@ function App(): JSX.Element {
   const [isLogged, setIsLogged] = useState<isLoggedType>(isLoggedType.INITIAL);
   const navigate = useNavigate();
   const [queryParams] = useSearchParams();
-  // const history = usehi
 
   useEffect(() => {
     async function getUserAuth() {
@@ -26,7 +24,7 @@ function App(): JSX.Element {
         if (data) {
           if (queryParams.get("redirect")) {
             navigate(
-              `/${queryParams.get("redirect")?.replace("|", "&")}`
+              `/${queryParams.get("redirect")?.replaceAll("|", "&")}`
             );
             return;
           }

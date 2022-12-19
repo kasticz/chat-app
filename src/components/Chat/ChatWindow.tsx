@@ -1,4 +1,4 @@
-import { Navigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { auth } from "firebaseDB/setup";
 import {
@@ -9,7 +9,7 @@ import {
 } from "firebaseDB/db";
 import { useNavigate, useLocation } from "react-router-dom";
 import { IChatMessage } from "types/IChatMessage";
-import noAvatar from "@assets/placeholder.webp";
+import noAvatar from "@assets/placeholder.png";
 import arrowLogout from "@assets/arrowLogout.svg";
 import styles from "./ChatWindow.module.sass";
 import { retrieveAvatar } from "firebaseDB/storage";
@@ -38,6 +38,7 @@ export default function ChatWindow() {
   const botId = queryParams.get('botId')
   const user2 = String(queryParams.get('user2'))
 
+
   useEffect(() => {
     async function getChatHistory() {
       const chatHistory = await retrieveChatHistory(
@@ -60,24 +61,25 @@ export default function ChatWindow() {
     }
     if (!auth.currentUser) {
       navigate(
-        `/?redirect=chatting?${location.search.slice(1).replace("&", "|")}`
+        `/?redirect=chatting?${location.search.slice(1).replaceAll("&", "|")}`
       );
     } else {
       try {
         getUserName();
         getChatHistory();
         if(!botId){
-        // setInterval(()=>{
-      //     getChatHistory();
-        // },2000)
+        setInterval(()=>{
+          getChatHistory();
+        },2000)
         }
-
         getAvatar();
       } catch (err) {
         navigate("/");
       }
     }
   }, [navigate, botId,user2, location.search]);
+
+
 
   const chatHistoryList = useMemo(() => {
     return chatHistoryState
@@ -86,7 +88,7 @@ export default function ChatWindow() {
             <ChatMessage
               uid={user2}
               item={item}
-              key={item.date.toLocaleString()}
+              key={item.date instanceof Date ? item.date.toISOString() : item.date }
             />
           );
         })
@@ -102,6 +104,7 @@ export default function ChatWindow() {
   async function sendMsg(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const msgText = inputRef.current?.value;
+    inputRef.current?.focus()
     if (!msgText) return;
     try {
       const msg: IChatMessage = {
@@ -115,6 +118,7 @@ export default function ChatWindow() {
         if (!prevState) return [msg];
         return [...prevState, msg];
       });
+      inputRef.current.value = '';
       setTimeout(() => {
         dummyDivToScrollRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 200);
@@ -126,7 +130,9 @@ export default function ChatWindow() {
           return [...prevState, reply];
         })
       }
-      inputRef.current.value = '';
+      setTimeout(() => {
+        dummyDivToScrollRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 200);
     } catch (err) {
       setError("Что то пошло не так. Попробуйте позже");
     }

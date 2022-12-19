@@ -1,5 +1,4 @@
 import TextInput from "components/UI/TextInput";
-import { Fragment } from "react";
 import { createUser, uploadUserDataToDb } from "firebaseDB/db";
 import { useState,useRef } from "react";
 import { ILoginForm, initialRegisterForm} from "types/loginForm";
@@ -32,12 +31,12 @@ export default function LoginForm() {
             const userData = await createUser(registerFormStatus.login.value,registerFormStatus.password.value)
             const form = new FormData(formRef.current)
 
-            await uploadUserDataToDb(form,userData.user.uid,await userData.user.getIdToken())   
+            await uploadUserDataToDb(form,userData.user.uid,await userData.user.getIdToken())  
 
-            if(registerFormStatus.attached?.value){                
+            if(form.get('attached')){                
                 await uploadUserAvatarToStorage(form.get('attached'),userData.user.uid)
-                localStorage.setItem('refreshToken',userData.user.refreshToken)
             }     
+            localStorage.setItem('refreshToken',userData.user.refreshToken)
             navigate('/main')
         }
       
@@ -81,10 +80,10 @@ export default function LoginForm() {
           validation={AttachedValidation}
           label="Аватар"
           input={{ id: "attached", type: "file",name:'attached' }} />
-        <button  className={formNotValid ? `${styles.loginButton} ${styles.disabledButton}` : styles.loginButton}>Войти</button>
+        <button style={{width:'220px'}}  className={formNotValid ? `${styles.loginButton} ${styles.disabledButton}` : styles.loginButton}>Зарегистрироваться</button>
       </form>
       <p className={styles.registerMsg}>
-        Уже есть аккаунт? <a href="/">Зарегистрироваться</a>
+        Уже есть аккаунт? <a href="/">Войти</a>
       </p>
       </main>
   );
